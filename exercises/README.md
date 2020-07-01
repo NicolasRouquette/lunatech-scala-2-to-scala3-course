@@ -1,108 +1,90 @@
-# An Akka Typed/Scala based Sudoku Solver - Initial State
+# Automatic rewriting  by the Dotty compiler of deprecated Scala 2 syntax 
 
 ## Background
 
-This application implements an Akka Typed/Scala based Sudoku Solver that
-consists of 29 actors.
-
-The application will also start up an instance of a Sudoku problem generator.
-
-We will first show you how to run the application.
-
+In this exercise, we will play with `dotc`'s capability to report and rewrite
+occurrences of some of the Scala 2 language features that are deprecated in
+Scala 2.13
 
 ## Steps
 
-- In the project's root folder, start an `sbt` session
+Let's first explore what the compiler can help us with when migrating our
+Scala 2.13 based application to Dotty. The compiler has a compile option `-source`
+for which we can specify an additional argument. Here's the abbreviated output
+from `dotc -help`
 
-- Run the provided tests by executing the `test` command from the `sbt` prompt
-  You should see output similar to the following:
-  
-```scala
-man [e] > Scala 2 to Scala 3 > sudoku solver initial state > test
-[info] Compiling 11 Scala sources to /Users/ericloots/tmp/lin/lunatech-scala-2-to-scala3-course/exercises/target/scala-0.24/classes ...
-[info] Compiling 6 Scala sources to /Users/ericloots/tmp/lin/lunatech-scala-2-to-scala3-course/exercises/target/scala-0.24/test-classes ...
-SLF4J: A number (1) of logging calls during the initialization phase have been intercepted and are
-SLF4J: now being replayed. These are subject to the filtering rules of the underlying logging system.
-SLF4J: See also http://www.slf4j.org/codes.html#replay
-[info] SudokuDetailProcessorSpec:
-[info] Sending no updates to a sudoku detail processor
-[info] - should result in sending a SudokuDetailUnchanged messsage
-[info] Sending an update to a fresh instance of the SudokuDetailProcessor that sets one cell to a single value
-[info] - should result in sending an update that reflects this update
-[info] Sending a series of subsequent Updates to a SudokuDetailProcessor
-[info] - should result in sending updates and ultimately return no changes
-[info] ReductionRuleSpec:
-[info] Applying reduction rules
-[info] - should Eliminate values in isolated complete sets from occurrences in other cells (First reduction rule)
-[info] - should Eliminate values in isolated complete sets of 5 values from occurrences in other cells (First reduction rule)
-[info] - should Eliminate values in 2 isolated complete sets of 3 values from occurrences in other cells (First reduction rule)
-[info] - should Eliminate values in shadowed complete sets from occurrences in same cells (Second reduction rule)
-[info] - should Eliminate values in shadowed complete (6 value) sets from occurrences in same cells (Second reduction rule)
-[info] CellMappingSpec:
-[info] Mapping row coordinates
-[info] - should result in correct column & block coordinates
-[info] Mapping column coordinates
-[info] - should result in correct row & block coordinates
-[info] Mapping block coordinates
-[info] - should result in correct row & column coordinates
-[info] Run completed in 562 milliseconds.
-[info] Total number of tests run: 11
-[info] Suites: completed 3, aborted 0
-[info] Tests: succeeded 11, failed 0, canceled 0, ignored 0, pending 0
-[info] All tests passed.
-[success] Total time: 9 s, completed 04 Jun 2020, 12:47:16
-man [e] > Scala 2 to Scala 3 > sudoku solver initial state >
+```bash
+$ dotc -help
+Usage: dotc <options> <source files>
+where possible standard options include:
+-P                 Pass an option to a plugin, e.g. -P:<plugin>:<opt>
+-X                 Print a synopsis of advanced options.
+-Y                 Print a synopsis of private options.
+...
+   <elided>
+...
+-rewrite           When used in conjunction with a `...-migration` source version, rewrites sources to migrate to new version.
+...
+   <elided>
+...
+-source            source version
+                   Default: 3.0.
+                   Choices: 3.0, 3.1, 3.0-migration, 3.1-migration.
 ```
 
-- Run the Sodukosolver by executing the `runSolver` command from the `sbt` prompt
+We have introduced some deprecated Scala 2 syntactic constructions on purpose so
+that you can see the rewriting at work. Let's get started!
 
-- Note that you can stop the application by hitting `Return` in the sbt session
-
-- Observe sudoku solver in action: you should see the following output:
+- Execute the following command from the `sbt` prompt:
 
 ```scala
-man [e] > Scala 2 to Scala 3 > sudoku solver initial state > runSolver
-[info] running org.lunatechlabs.dotty.SudokuSolverMain -Dcluster-node-configuration.cluster-id=cluster-0 -Dcluster-node-configuration.node-hostname=localhost -Dakka.remote.artery.canonical.port=2550
-08:55:17 INFO  [] - Slf4jLogger started
-SLF4J: A number (1) of logging calls during the initialization phase have been intercepted and are
-SLF4J: now being replayed. These are subject to the filtering rules of the underlying logging system.
-SLF4J: See also http://www.slf4j.org/codes.html#replay
-Hit RETURN to stop solver
-08:55:18 INFO  [akka://sudoku-solver-system/user/sudoku-solver] - Sudoku processing time: 156 milliseconds
-08:55:18 INFO  [akka://sudoku-solver-system/user/sudoku-problem-sender] -
-+---+---+---+
-|712|948|635|
-|835|762|941|
-|496|531|278|
-+---+---+---+
-|147|896|352|
-|569|213|784|
-|283|475|169|
-+---+---+---+
-|324|659|817|
-|951|387|426|
-|678|124|593|
-+---+---+---+
-08:55:18 INFO  [akka://sudoku-solver-system/user/sudoku-solver] - Sudoku processing time: 44 milliseconds
-08:55:18 INFO  [akka://sudoku-solver-system/user/sudoku-problem-sender] -
-+---+---+---+
-|678|124|593|
-|951|387|426|
-|324|659|817|
-+---+---+---+
-|283|475|169|
-|569|213|784|
-|147|896|352|
-+---+---+---+
-|496|531|278|
-|835|762|941|
-|712|948|635|
-+---+---+---+
-.
-.
-.
+pullTemplate scala/org/lunatechlabs/dotty/sudoku/SudokuSolver.scala
 ```
 
-- You can control the rate at which the Sudoku problem generator sends problems by
-  tweaking the setting `sudoku-solver.problem-sender.send-interval` in the
-  `sudokusolver.conf` configuration file
+> NOTE: The course repository you're using at the moment is a git repository.
+>      This will be helpfull to see the changes that the compiler applies
+>      when re-writing source files
+
+- Let's start by taking a snapshot in git of the current state of the exercise
+  source code. Do this by executing the following commands in the exercises
+  root folder:
+
+```scala
+$ git add -A
+$ git commit -m "Snapshot before Dotty compiler rewrite"
+```
+
+- Create a new `build.sbt` file in this exercise's base folder
+- In that file, add the following lines:
+
+```scala
+scalacOptions ++=
+  Seq(
+    "-source:3.0-migration",
+  )
+```
+
+> Note: When changing the build definition by adding the `build.sbt` and
+  subsequently editing its content, don't forget to reload the build
+  definition in `sbt` (by issuing the `reload` command)
+
+- Compile and investigate what the compiler reports
+
+- Let the compiler correct the problem by adding the `-rewrite` compiler option
+
+```scala
+scalacOptions ++=
+  Seq(
+    "-source:3.0-migration",
+    "-rewrite"
+  )
+```
+
+- Compile the code again and watch the magic...
+
+> NOTE:  The easiest way to see what the compiler changed is to run the `git diff` command
+
+We can repeat this process by changing the compiler `-source` compiler option
+to `-source:3.1-migration`
+
+- Try this out for your self and check what is reported and what changes

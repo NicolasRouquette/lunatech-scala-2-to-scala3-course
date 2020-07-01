@@ -165,4 +165,12 @@ class SudokuSolver private (context: ActorContext[SudokuSolver.Command],
       processors <- allDetailProcessors
       (_, processor) <- processors
     } processor ! SudokuDetailProcessor.ResetSudokuDetailState
+
+  // Added on purpose to illustrate code rewriting capabilities of dotc
+  // for deprecated language features
+  private def checkHaha(s: String) {
+    val haha = 'Haha
+    val noHaha = 'NoHaha
+    if (s startsWith haha.name) println(haha.name) else println(noHaha.name)
+  }
 }
