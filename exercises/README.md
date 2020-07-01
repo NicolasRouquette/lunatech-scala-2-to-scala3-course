@@ -1,90 +1,58 @@
-# Automatic rewriting  by the Dotty compiler of deprecated Scala 2 syntax 
+# Exploring Dotty's new control structure and indentation based syntax
+
 
 ## Background
 
-In this exercise, we will play with `dotc`'s capability to report and rewrite
-occurrences of some of the Scala 2 language features that are deprecated in
-Scala 2.13
+Dotty introduces some new syntax which can be divided in two categories:
+
+- A new control structure syntax
+- The possibility to use an indentation based syntax as opposed to the traditional
+  syntax using curly braces
+
+The Dotty compiler includes a rewrite functionality to rewrite existing source code
+to a different syntax.
+
+It should be noted that the indentation based syntax only works with the new control
+structure syntax. As a consequence, changes to the syntax goes to a specific sequence:
+
+- Curly braces syntax + old control structure syntax
+- Curly braces syntax + new control structure syntax
+- Indentation based syntax + new control structure syntax
+
+Changing the syntax is a reversible process (except that after going back to where
+one came from, the formatting may be different, but semantically equivalent).
 
 ## Steps
 
-Let's first explore what the compiler can help us with when migrating our
-Scala 2.13 based application to Dotty. The compiler has a compile option `-source`
-for which we can specify an additional argument. Here's the abbreviated output
-from `dotc -help`
+- Run the `pullSolution` command from the `sbt` prompt
 
-```bash
-$ dotc -help
-Usage: dotc <options> <source files>
-where possible standard options include:
--P                 Pass an option to a plugin, e.g. -P:<plugin>:<opt>
--X                 Print a synopsis of advanced options.
--Y                 Print a synopsis of private options.
-...
-   <elided>
-...
--rewrite           When used in conjunction with a `...-migration` source version, rewrites sources to migrate to new version.
-...
-   <elided>
-...
--source            source version
-                   Default: 3.0.
-                   Choices: 3.0, 3.1, 3.0-migration, 3.1-migration.
-```
-
-We have introduced some deprecated Scala 2 syntactic constructions on purpose so
-that you can see the rewriting at work. Let's get started!
-
-- Execute the following command from the `sbt` prompt:
+- Inspect the `build.sbt` file in the `exercises` folder
+  - At the end of this file, you will see the following 4 lines that have
+    been commented out:
 
 ```scala
-pullTemplate scala/org/lunatechlabs/dotty/sudoku/SudokuSolver.scala
+   // scalacOptions ++= rewriteToNewSyntax
+   // scalacOptions ++= rewriteToIndentBasedSyntax
+   // scalacOptions ++= rewriteToNonIndentBasedSyntax
+   // scalacOptions ++= rewriteToOldSyntax
 ```
 
-> NOTE: The course repository you're using at the moment is a git repository.
->      This will be helpfull to see the changes that the compiler applies
->      when re-writing source files
-
-- Let's start by taking a snapshot in git of the current state of the exercise
-  source code. Do this by executing the following commands in the exercises
-  root folder:
+- Before proceeding, let's take a snapshot of the current state of the exercises
+  by executing the following commands:
 
 ```scala
 $ git add -A
-$ git commit -m "Snapshot before Dotty compiler rewrite"
+$ git commit -m "Snapshot before Dotty compiler syntax rewrites"
 ```
 
-- Create a new `build.sbt` file in this exercise's base folder
-- In that file, add the following lines:
+- The values on the right side of the `++=` operator are defined in the beginning
+  of the files and each contains a specific set of compiler options.
 
-```scala
-scalacOptions ++=
-  Seq(
-    "-source:3.0-migration",
-  )
-```
-
-> Note: When changing the build definition by adding the `build.sbt` and
-  subsequently editing its content, don't forget to reload the build
-  definition in `sbt` (by issuing the `reload` command)
-
-- Compile and investigate what the compiler reports
-
-- Let the compiler correct the problem by adding the `-rewrite` compiler option
-
-```scala
-scalacOptions ++=
-  Seq(
-    "-source:3.0-migration",
-    "-rewrite"
-  )
-```
-
-- Compile the code again and watch the magic...
-
-> NOTE:  The easiest way to see what the compiler changed is to run the `git diff` command
-
-We can repeat this process by changing the compiler `-source` compiler option
-to `-source:3.1-migration`
-
-- Try this out for your self and check what is reported and what changes
+- Now go through the following sequence of actions:
+  - Uncomment one `scalacOptions ++= ...` line at a time
+  - As a consequence of this, the build definition is changed, so don't forget
+    to run the `reload` command on the `sbt` prompt
+  - From the sbt prompt, run the `clean` command followed by running `compile`.
+    You will see that the compiler will _patch_ the source files
+  - Explore the changes applied by the rewrites (you can use the `git diff` command
+    for this)
