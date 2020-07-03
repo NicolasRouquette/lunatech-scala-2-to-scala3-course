@@ -11,7 +11,7 @@ object ReductionRules {
     completeAndIsolatedValueSets.foldLeft(reductionSet) {
       case (cells, caivSet) =>
         cells.map { cell =>
-          if (cell != caivSet) cell &~ caivSet else cell
+          if cell != caivSet then cell &~ caivSet else cell
         }
     }
   }
@@ -20,7 +20,7 @@ object ReductionRules {
     val valueOccurrences = CELLPossibleValues.map { value =>
       cellIndexesVector.zip(reductionSet).foldLeft(Vector.empty[Int]) {
         case (acc, (index, cell)) =>
-          if (cell contains value) index +: acc else acc
+          if cell contains value then index +: acc else acc
       }
     }
 

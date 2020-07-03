@@ -23,7 +23,7 @@ val rewriteToOldSyntax =
     "-rewrite"
   )
 
-// scalacOptions ++= rewriteToNewSyntax
+scalacOptions ++= rewriteToNewSyntax
 // scalacOptions ++= rewriteToIndentBasedSyntax
 // scalacOptions ++= rewriteToNonIndentBasedSyntax
 // scalacOptions ++= rewriteToOldSyntax

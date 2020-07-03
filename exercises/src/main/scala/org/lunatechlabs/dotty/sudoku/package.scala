@@ -25,11 +25,11 @@ package object sudoku {
           .map { case SudokuDetailProcessor.RowUpdate(id, cellUpdates) => (id, cellUpdates) }
           .to(Map)
           .withDefaultValue(cellUpdatesEmpty)
-      val sudoku = for {
+      val sudoku = for
         (row, cellUpdates) <- Vector.range(0, 9).map(row => (row, rows(row)))
         x = cellUpdates.to(Map).withDefaultValue(Set(0))
         y = Vector.range(0, 9).map(n => x(n))
-      } yield y
+      yield y
       SudokuField(sudoku)
     }
   }
