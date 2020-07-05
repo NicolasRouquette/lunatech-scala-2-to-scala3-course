@@ -1,58 +1,47 @@
-# Exploring Dotty's new control structure and indentation based syntax
-
+# Top Level Definitions
 
 ## Background
 
-Dotty introduces some new syntax which can be divided in two categories:
+Dotty now has support for `Top Level Definitions`. In short, these replace Scala
+2's `package object`s. Definitions such as methods, [given] values, type aliases
+can be written at the top level.
 
-- A new control structure syntax
-- The possibility to use an indentation based syntax as opposed to the traditional
-  syntax using curly braces
+The goal of this exercise is to remove package objects from our codebase and
+replace it with `Top Level Definitions`.
 
-The Dotty compiler includes a rewrite functionality to rewrite existing source code
-to a different syntax.
+The following is a typical `package object`
 
-It should be noted that the indentation based syntax only works with the new control
-structure syntax. As a consequence, changes to the syntax goes to a specific sequence:
+```scala
+package foo.bar
 
-- Curly braces syntax + old control structure syntax
-- Curly braces syntax + new control structure syntax
-- Indentation based syntax + new control structure syntax
+package object baz {
+  def x(a: Int): Int = {
+    a
+  }
+}
+```
 
-Changing the syntax is a reversible process (except that after going back to where
-one came from, the formatting may be different, but semantically equivalent).
+This can be written in a toplevel definition as follows
+
+```scala
+package foo.bar.baz
+
+def x(a: Int): Int = {
+  a
+}
+```
 
 ## Steps
 
-- Run the `pullSolution` command from the `sbt` prompt
+- Find any package objects available in the existing project
 
-- Inspect the `build.sbt` file in the `exercises` folder
-  - At the end of this file, you will see the following 4 lines that have
-    been commented out:
+- Create a new source file inside the same package using any meaningful name
 
-```scala
-   // scalacOptions ++= rewriteToNewSyntax
-   // scalacOptions ++= rewriteToIndentBasedSyntax
-   // scalacOptions ++= rewriteToNonIndentBasedSyntax
-   // scalacOptions ++= rewriteToOldSyntax
-```
+- Copy the contents of the `package object` to the newly created source file
 
-- Before proceeding, let's take a snapshot of the current state of the exercises
-  by executing the following commands:
+- Remove the package object
 
-```scala
-$ git add -A
-$ git commit -m "Snapshot before Dotty compiler syntax rewrites"
-```
+- Run the provided tests by executing the `test` command from the `sbt` prompt
+  and verify that all tests pass
 
-- The values on the right side of the `++=` operator are defined in the beginning
-  of the files and each contains a specific set of compiler options.
-
-- Now go through the following sequence of actions:
-  - Uncomment one `scalacOptions ++= ...` line at a time
-  - As a consequence of this, the build definition is changed, so don't forget
-    to run the `reload` command on the `sbt` prompt
-  - From the sbt prompt, run the `clean` command followed by running `compile`.
-    You will see that the compiler will _patch_ the source files
-  - Explore the changes applied by the rewrites (you can use the `git diff` command
-    for this)
+- Verify that the application runs correctly

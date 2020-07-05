@@ -5,12 +5,13 @@ import scala.language.implicitConversions
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import java.nio.file._
 
-class SudokuDetailProcessorSuite extends munit.FunSuite with SudokuTestHelpers:
+class SudokuDetailProcessorSuite extends munit.FunSuite with SudokuTestHelpers {
 
   val testKit: ActorTestKit = ActorTestKit()
 
-  override def afterAll(): Unit =
+  override def afterAll(): Unit = {
     testKit.shutdownTestKit()
+  }
 
   test("Sending no updates to a sudoku detail processor should result in sending a SudokuDetailUnchanged messsage") {
 
@@ -122,3 +123,4 @@ class SudokuDetailProcessorSuite extends munit.FunSuite with SudokuTestHelpers:
     detailParentProbe.expectMessage(SudokuDetailUnchanged)
 
   } 
+}
